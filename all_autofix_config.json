@@ -1,0 +1,38 @@
+[
+  {
+    "issue_id": "46",
+    "file_path": "demo_code.py",
+    "issue_title": "Arbitrary code execution",
+    "issue_text": "The `sum` method uses `eval()`, which can execute arbitrary code if inputs `a` or `b` are manipulated. This is a major security risk and is also inefficient for simple addition.\n\nReplace `eval(\"a + b\")` with the direct arithmetic operation `a + b` to eliminate the vulnerability.",
+    "start_line": 48,
+    "end_line": 48,
+    "fix_steps": "In `demo_code.py`, inside the `sum` method, replace the line `return eval(\"a + b\")` with `return a + b`. This change removes the use of `eval`, which is a security vulnerability, and replaces it with a direct, safe, and more efficient addition operation.",
+    "feedback": null,
+    "patch_infos": null,
+    "use_stream": true
+  },
+  {
+    "issue_id": "47",
+    "file_path": "demo_code.py",
+    "issue_title": "Mutable default argument",
+    "issue_text": "The `get_digits` method uses a mutable list as a default argument. This list is created only once. If modified by a caller, the change persists for all subsequent calls, causing unexpected behavior.\n\nUse an immutable default like `None` and create the list inside the method.",
+    "start_line": 42,
+    "end_line": 42,
+    "fix_steps": "In `demo_code.py`, modify the `get_digits` method.\n1. Change the method signature from `def get_digits(self, min_max=[1, 10]):` to `def get_digits(self, min_max=None):`.\n2. Add the following code as the first line inside the method:\n```python\n        if min_max is None:\n            min_max = [1, 10]\n```\nThis ensures a new list is created for each call that doesn't provide the `min_max` argument, preventing shared state between calls.",
+    "feedback": null,
+    "patch_infos": null,
+    "use_stream": true
+  },
+  {
+    "issue_id": "48",
+    "file_path": "demo_code.py",
+    "issue_title": "Unsafe input validation",
+    "issue_text": "The `get_digits` method uses `assert` to validate input types. These statements are removed when Python runs in optimized mode (`-O`), so this validation will be skipped in production. This could lead to runtime errors if invalid data is passed.\n\nReplace `assert` with a conditional check that raises a `TypeError`.",
+    "start_line": 44,
+    "end_line": 44,
+    "fix_steps": "In `demo_code.py`, inside the `get_digits` method, replace the line `assert all([isinstance(i, int) for i in min_max])` with the following code:\n```python\n        if not all(isinstance(i, int) for i in min_max):\n            raise TypeError(\"min_max must contain only integers\")\n```\nThis ensures that input validation is always performed, even in optimized production environments.",
+    "feedback": null,
+    "patch_infos": null,
+    "use_stream": true
+  }
+]
