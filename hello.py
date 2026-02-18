@@ -19,8 +19,9 @@ class BaseNumberGenerator:
     def get_number(self, min_max):
         raise NotImplemented
 
-    def smethod():
+    def smethod(a: str, b: str):
         """static method-to-be"""
+        return int(a+b)
 
     smethod = staticmethod(smethod)
 
