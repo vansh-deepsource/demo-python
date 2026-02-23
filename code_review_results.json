@@ -1,89 +1,79 @@
 [
-    {
-        "comments": [
-            {
-                "file_path": "demo_code.py",
-                "start_line": 48,
-                "end_line": 48,
-                "issue_title": "Arbitrary code execution",
-                "issue_description": "`eval()` on a fixed string can lead to code injection if modified",
-                "comment": "The `eval()` function executes the string argument as Python code, which is a significant security risk if the string can be influenced by external input. Even with a static string, it's a dangerous pattern that should be avoided.\n\nReplace `eval(\"a + b\")` with the direct arithmetic operation `a + b` to eliminate the security risk and improve performance.",
-                "fix_steps": "In `demo_code.py`, inside the `sum` function, replace the line `return eval(\"a + b\")` with `return a + b`. This change removes the use of `eval` and directly performs the addition, which is safer and more efficient.",
-                "fix_effort_score": 1,
-                "category": "bug-risk",
-                "severity": "critical",
-                "dimension": "reliability",
-                "locations_of_interest": [
-                    {
-                        "identifier_name": "sum",
-                        "definition": {
-                            "file_path": "demo_code.py",
-                            "start_line": 47,
-                            "end_line": 48
-                        },
-                        "usages": []
-                    },
-                    {
-                        "identifier_name": "eval",
-                        "definition": null,
-                        "usages": [
-                            {
-                                "file_path": "demo_code.py",
-                                "start_line": 48,
-                                "end_line": 48
-                            }
-                        ]
-                    }
-                ]
+  {
+    "comments": [
+      {
+        "file_path": "demo_code.py",
+        "start_line": 48,
+        "end_line": 48,
+        "issue_title": "Insecure `eval` usage",
+        "issue_description": "`eval()` on a static string is an anti-pattern",
+        "issue_detail": "Using `eval()` is dangerous as it can execute arbitrary code. While the string is static here, it's an unnecessary risk and a bad practice that can lead to vulnerabilities if modified.",
+        "comment": "The `sum` method uses `eval(\"a + b\")` to add two numbers. This is a significant security risk and an anti-pattern. It's unnecessarily slow and complex for a simple addition, and it creates a dangerous precedent that could lead to code injection vulnerabilities if the string were ever constructed from user input.\n\nReplace `eval(\"a + b\")` with the direct and safe operation `a + b`.",
+        "fix_steps": "In `demo_code.py`, inside the `sum` method of the `RandomNumberGenerator` class, replace the line `return eval(\"a + b\")` with `return a + b`.",
+        "fix_effort_score": 1,
+        "category": "antipattern",
+        "severity": "critical",
+        "dimension": "reliability",
+        "impact_score": 9,
+        "impact_rationale": "High probability (every call), severe impact (potential for code execution), trivial fix.",
+        "locations_of_interest": [
+          {
+            "identifier_name": "sum",
+            "definition": {
+              "file_path": "demo_code.py",
+              "start_line": 47,
+              "end_line": 48
             },
-            {
-                "file_path": "demo_code.py",
-                "start_line": 42,
-                "end_line": 42,
-                "issue_title": "Mutable default argument",
-                "issue_description": "Using a mutable list as a default argument leads to unexpected behavior",
-                "comment": "Default arguments are evaluated only once when the function is defined. If a mutable default argument like a list is modified, the change persists across subsequent calls. This can lead to unpredictable behavior and bugs that are hard to trace.\n\nUse an immutable default like `None` and create a new list inside the function if no argument is provided, for example: `min_max = min_max or [1, 10]`.",
-                "fix_steps": "In `demo_code.py`, modify the `get_digits` function signature.\n1. Change `def get_digits(self, min_max=[1, 10]):` to `def get_digits(self, min_max=None):`.\n2. Add the following block at the beginning of the function body:\n```python\n        if min_max is None:\n            min_max = [1, 10]\n```\nThis ensures that a new list `[1, 10]` is created for each call that doesn't provide the `min_max` argument, preventing side-effects between calls.",
-                "fix_effort_score": 2,
-                "category": "antipattern",
-                "severity": "major",
-                "dimension": "reliability",
-                "locations_of_interest": [
-                    {
-                        "identifier_name": "get_digits",
-                        "definition": {
-                            "file_path": "demo_code.py",
-                            "start_line": 42,
-                            "end_line": 45
-                        },
-                        "usages": []
-                    }
-                ]
-            },
-            {
-                "file_path": "demo_code.py",
-                "start_line": 44,
-                "end_line": 44,
-                "issue_title": "Unsafe input validation",
-                "issue_description": "`assert` statements are disabled in production builds, removing validation",
-                "comment": "Using `assert` for input validation is unsafe because assertions can be disabled when running Python in optimized mode (with the `-O` flag). This would silently bypass the type check and could lead to runtime errors or incorrect behavior.\n\nReplace the `assert` statement with a conditional check that raises a `TypeError` or `ValueError` to ensure validation is always performed.",
-                "fix_steps": "In `demo_code.py`, inside the `get_digits` method, replace the line `assert all([isinstance(i, int) for i in min_max])` with the following code:\n```python\n        if not all(isinstance(i, int) for i in min_max):\n            raise TypeError(\"min_max must contain only integers\")\n```\nThis ensures that the type check is always executed, regardless of Python's optimization flags.",
-                "fix_effort_score": 1,
-                "category": "bug-risk",
-                "severity": "major",
-                "dimension": "reliability",
-                "locations_of_interest": [
-                    {
-                        "identifier_name": "get_digits",
-                        "definition": {
-                            "file_path": "demo_code.py",
-                            "start_line": 42,
-                            "end_line": 45
-                        },
-                        "usages": []
-                    }
-                ]
-            }
+            "usages": []
+          },
+          {
+            "identifier_name": "eval",
+            "definition": null,
+            "usages": [
+              { "file_path": "demo_code.py", "start_line": 48, "end_line": 48 }
+            ]
+          }
         ]
-    }
+      },
+      {
+        "file_path": "demo_code.py",
+        "start_line": 42,
+        "end_line": 42,
+        "issue_title": "Mutable default argument",
+        "issue_description": "Using mutable `list` as a default argument",
+        "issue_detail": "The default `min_max` list can be modified by callers, causing unexpected behavior for subsequent calls that rely on the default value. This can lead to bugs that are hard to trace.",
+        "comment": "The `get_digits` method uses a mutable list `[1, 10]` as a default argument for `min_max`. If this list is modified, it will affect all subsequent calls to `get_digits` that don't provide this argument, leading to unpredictable behavior and potential errors like a `TypeError`.\n\nUse an immutable default like `None` and create a new list inside the function if no argument is provided. For example: `def get_digits(self, min_max=None):\\n    if min_max is None:\\n        min_max = [1, 10]`",
+        "fix_steps": "In `demo_code.py`, in the `RandomNumberGenerator` class, replace the signature of `get_digits` from `def get_digits(self, min_max=[1, 10]):` to `def get_digits(self, min_max=None):`. Then, add the following lines at the beginning of the method, before the `assert` statement:\n```python\n        if min_max is None:\n            min_max = [1, 10]\n```",
+        "fix_effort_score": 2,
+        "category": "bug-risk",
+        "severity": "major",
+        "dimension": "reliability",
+        "impact_score": 7,
+        "impact_rationale": "High probability (common Python pitfall), moderate impact (unexpected behavior, potential `TypeError`), easy fix.",
+        "locations_of_interest": [
+          {
+            "identifier_name": "get_digits",
+            "definition": {
+              "file_path": "demo_code.py",
+              "start_line": 42,
+              "end_line": 45
+            },
+            "usages": []
+          },
+          {
+            "identifier_name": "min_max",
+            "definition": {
+              "file_path": "demo_code.py",
+              "start_line": 42,
+              "end_line": 42
+            },
+            "usages": [
+              { "file_path": "demo_code.py", "start_line": 44, "end_line": 44 },
+              { "file_path": "demo_code.py", "start_line": 45, "end_line": 45 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 ]
