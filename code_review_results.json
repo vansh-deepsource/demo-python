@@ -1,0 +1,111 @@
+[
+    {
+        "comments": [
+            {
+                "file_path": "demo_code.py",
+                "start_line": 48,
+                "end_line": 48,
+                "issue_title": "Insecure use of `eval`",
+                "issue_description": "Use of `eval` for simple arithmetic is an anti-pattern",
+                "issue_detail": "Using `eval` for a simple addition is inefficient and dangerous. While the expression is a literal now, this pattern can lead to code injection if it's ever constructed from external input.",
+                "comment": "The `sum` method uses `eval(\"a + b\")` to perform addition. This is inefficient and a significant security risk if the expression were ever to include user-controlled data. It makes the code harder to understand and provides no benefit over the direct arithmetic operation.\n\nReplace `eval(\"a + b\")` with the simple addition operator `a + b`.",
+                "fix_steps": "In `demo_code.py`, inside the `sum` method, replace `return eval(\"a + b\")` with `return a + b`. This removes the unnecessary and dangerous use of `eval` for a simple arithmetic operation.",
+                "fix_effort_score": 1,
+                "category": "antipattern",
+                "severity": "critical",
+                "dimension": "security",
+                "impact_score": 9,
+                "impact_rationale": "High probability (every call), severe potential impact (code injection), trivial fix -> high ROI.",
+                "locations_of_interest": [
+                    {
+                        "identifier_name": "eval",
+                        "definition": null,
+                        "usages": [
+                            {
+                                "file_path": "demo_code.py",
+                                "start_line": 48,
+                                "end_line": 48
+                            }
+                        ]
+                    },
+                    {
+                        "identifier_name": "sum",
+                        "definition": {
+                            "file_path": "demo_code.py",
+                            "start_line": 47,
+                            "end_line": 48
+                        },
+                        "usages": []
+                    }
+                ]
+            },
+            {
+                "file_path": "demo_code.py",
+                "start_line": 44,
+                "end_line": 45,
+                "issue_title": "Insufficient input validation",
+                "issue_description": "Input `min_max` is not validated for length and uses `assert` for type checks",
+                "issue_detail": "The method uses `assert` for type checking, which can be disabled in production. It also lacks a length check for `min_max`, causing a `TypeError` during unpacking if the length is not 2.",
+                "comment": "The `get_digits` method relies on `assert` for type validation, which can be disabled in production environments. Additionally, it fails to validate that `min_max` has exactly two elements before unpacking it into `random.randint`, which will cause a `TypeError` if an invalid list is passed.\n\nReplace the `assert` with explicit checks for both type and length, raising a `ValueError` or `TypeError` for invalid input.",
+                "fix_steps": "In `demo_code.py`, inside `get_digits`, replace `assert all([isinstance(i, int) for i in min_max])` with robust validation that checks type and length. For example:\n`if not isinstance(min_max, list) or len(min_max) != 2:\n    raise ValueError(\"min_max must be a list of two elements.\")\nif not all(isinstance(i, int) for i in min_max):\n    raise TypeError(\"min_max elements must be integers.\")`",
+                "fix_effort_score": 1,
+                "category": "bug-risk",
+                "severity": "major",
+                "dimension": "reliability",
+                "impact_score": 8,
+                "impact_rationale": "High probability (any invalid input), moderate impact (runtime error), easy fix -> high ROI.",
+                "locations_of_interest": [
+                    {
+                        "identifier_name": "get_digits",
+                        "definition": {
+                            "file_path": "demo_code.py",
+                            "start_line": 42,
+                            "end_line": 45
+                        },
+                        "usages": []
+                    },
+                    {
+                        "identifier_name": "random.randint",
+                        "definition": null,
+                        "usages": [
+                            {
+                                "file_path": "demo_code.py",
+                                "start_line": 45,
+                                "end_line": 45
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "file_path": "demo_code.py",
+                "start_line": 42,
+                "end_line": 42,
+                "issue_title": "Mutable default argument",
+                "issue_description": "Using a mutable list `[1, 10]` as a default argument",
+                "issue_detail": "Default arguments are evaluated once at function definition. If a mutable default is modified, the change persists across calls, causing unexpected behavior.",
+                "comment": "The `get_digits` method uses a list `[1, 10]` as a default value for `min_max`. Since lists are mutable, if any code modifies this default list, all subsequent calls to `get_digits` without an explicit `min_max` argument will use the modified list, which can lead to hard-to-debug bugs.\n\nUse an immutable default like `None` and create a new list inside the function if no argument is provided. For example: `def get_digits(self, min_max=None):\n    if min_max is None:\n        min_max = [1, 10]`.",
+                "fix_steps": "In `demo_code.py`, change the signature of `get_digits` to `def get_digits(self, min_max=None):`. Then, at the beginning of the method, add the lines: `if min_max is None:\\n    min_max = [1, 10]`. This avoids using a mutable list as a default argument, preventing unexpected side-effects between calls.",
+                "fix_effort_score": 1,
+                "category": "antipattern",
+                "severity": "major",
+                "dimension": "reliability",
+                "impact_score": 7,
+                "impact_rationale": "Moderate probability (requires modification of default), high impact (hard-to-debug side effects), easy fix -> good ROI.",
+                "locations_of_interest": [
+                    {
+                        "identifier_name": "get_digits",
+                        "definition": {
+                            "file_path": "demo_code.py",
+                            "start_line": 42,
+                            "end_line": 45
+                        },
+                        "usages": []
+                    }
+                ]
+            }
+        ],
+        "ai_overview": "",
+        "file_path": "demo_code.py"
+    }
+]
